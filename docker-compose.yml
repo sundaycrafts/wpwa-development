@@ -1,0 +1,31 @@
+version: '2'
+
+services:
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - ./db/dump.sql:/docker-entrypoint-initdb.d/install_wordpress.sql
+    ports:
+      - "3307:3306"
+    container_name: wpapp_db
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress
+    ports:
+      - "80:80"
+    restart: always
+    volumes:
+      - ./www/html:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+    container_name: wpapp_wp
