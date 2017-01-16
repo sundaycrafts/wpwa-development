@@ -1,0 +1,14 @@
+/*
+ Theme Name:   My WP App theme
+ Theme URI:    -
+ Description:  Twenty Twelve Child Theme
+ Author:       Hiroto Murai
+ Author URI:   https://github.com/sundaycrafts
+ Template:     twentytwelve
+ Version:      1.0.0
+ License:      GNU General Public License v2 or later
+ License URI:  http://www.gnu.org/licenses/gpl-2.0.html
+ Tags:         exmaple
+ Text Domain:  twenty-twelve-child
+*/
+@import '../twentytwelve/style.css';
