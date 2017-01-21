@@ -82,6 +82,19 @@ class WPWA_User_Manager {
     public function add_application_user_capabilities() {
         $role = get_role( 'follower' );
         $role->add_cap( 'follow_developer_activities' );
+
+        $developer = get_role('developer');
+        $custom_developer_capabilities = array(
+          'edit_posts',
+          'edit_private_posts',
+          'edit_published_posts',
+          'publish_posts',
+          'read',
+          'delete_posts',
+        );
+        foreach($custom_developer_capabilities as $capability) {
+          $developer->add_cap($capability);
+        }
     }
 
     /*
@@ -132,7 +145,7 @@ class WPWA_User_Manager {
 
             $username = isset ( $_POST['username'] ) ? $_POST['username'] : '';
             $password = isset ( $_POST['password'] ) ? $_POST['password'] : '';
-            
+
             if ( empty( $username ) )
                 array_push( $errors, 'Please enter a username.' );
 
@@ -145,7 +158,7 @@ class WPWA_User_Manager {
             }
 
             $credentials = array();
-            
+
             $credentials['user_login']      = $username;
             $credentials['user_login']      = sanitize_user( $credentials['user_login'] );
             $credentials['user_password']   = $password;
@@ -335,7 +348,7 @@ class WPWA_User_Manager {
     /*
      * Include neccessary styles for the plugin
      *
-     * @param  -  
+     * @param  -
      * @return void
     */
     public function generate_styles() {
