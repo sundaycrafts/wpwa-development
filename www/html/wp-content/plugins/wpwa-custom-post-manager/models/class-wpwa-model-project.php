@@ -3,9 +3,16 @@ class WPWA_Model_Project {
   private $post_type;
   private $template_parser;
 
+  private $technology_taxonomy;
+  private $project_type_taxonomy;
+
   public function __construct () {
     $this->post_type = 'wpwa_project';
+    $this->technology_taxonomy = 'wpwa_technology';
+    $this->project_type_taxonomy = 'wpwa_project_type';
+
     add_action('init', array($this, 'create_projects_post_type'));
+    add_action('init', array($this, 'create_projects_custom_taxonomies'));
   }
 
   function create_projects_post_type () {
@@ -42,5 +49,55 @@ class WPWA_Model_Project {
       'capability_type'     => 'post'
     );
     register_post_type($this->post_type, $args);
+  }
+
+  public function create_projects_custom_taxonomies () {
+    register_taxonomy(
+      $this->technology_taxonomy,
+      $this->post_type,
+      array(
+        'labels' => array(
+          'name'              => __('Technology', 'wpwa'),
+          'singular_name'     => __('Technology', 'wpwa'),
+          'search_items'      => __('Search Technology', 'wpwa'),
+          'all_items'         => __('All Technology', 'wpwa'),
+          'parent_item'       => __('Parent Technology', 'wpwa'),
+          'parent_item_colon' => __('Parent Technology:', 'wpwa'),
+          'edit_item'         => __('Edit Technology', 'wpwa'),
+          'update_item'       => __('Update Technology', 'wpwa'),
+          'add_new_item'      => __('Add New Technology', 'wpwa'),
+          'new_item_name'     => __('New Technology Name', 'wpwa'),
+          'menu_name'         => __('Technology', 'wpwa')
+        ),
+        'hierarchical' => true
+      )
+    );
+
+    register_taxonomy(
+      $this->project_type_taxonomy,
+      $this->post_type,
+      array(
+        'labels' => array(
+          'name'              => __('Project Type', 'wpwa'),
+          'singular_name'     => __('Project Type', 'wpwa'),
+          'search_items'      => __('Search Project Type', 'wpwa'),
+          'all_items'         => __('All Project Type', 'wpwa'),
+          'parent_item'       => __('Parent Project Type', 'wpwa'),
+          'parent_item_colon' => __('Parent Project Type:', 'wpwa'),
+          'edit_item'         => __('Edit Project Type', 'wpwa'),
+          'update_item'       => __('Update Project Type', 'wpwa'),
+          'add_new_item'      => __('Add New Project Type', 'wpwa'),
+          'new_item_name'     => __('New Project Type Name', 'wpwa'),
+          'menu_name'         => __('Project Type', 'wpwa')
+        ),
+        'hierarchical' => true,
+        'capabilities' => array(
+          'manage_terms' => 'manage_project_type',
+          'edit_terms'   => 'edit_project_type',
+          'delete_terms' => 'delete_project_type',
+          'assign_terms' => 'assign_project_type'
+        )
+      )
+    );
   }
 }

@@ -95,6 +95,17 @@ class WPWA_User_Manager {
         foreach($custom_developer_capabilities as $capability) {
           $developer->add_cap($capability);
         }
+
+        $role = get_role('administrator');
+        $custom_admin_capabilities = array(
+          'manage_project_type',
+          'edit_project_type',
+          'delete_project_type',
+          'assign_project_type'
+        );
+        foreach($custom_admin_capabilities as $capability) {
+          $role->add_cap($capability);
+        }
     }
 
     /*
