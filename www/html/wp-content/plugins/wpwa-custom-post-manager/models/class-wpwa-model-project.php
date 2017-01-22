@@ -13,6 +13,8 @@ class WPWA_Model_Project {
 
     add_action('init', array($this, 'create_projects_post_type'));
     add_action('init', array($this, 'create_projects_custom_taxonomies'));
+
+    add_action('add_meta_boxes', array($this, 'add_projects_meta_boxes'));
   }
 
   function create_projects_post_type () {
@@ -99,5 +101,30 @@ class WPWA_Model_Project {
         )
       )
     );
+  }
+
+  public function add_projects_meta_boxes () {
+    add_meta_box('wpwa-projects-meta', 'Projects Details',
+      array($this, 'display_projects_meta_boxes'), $this->post_type);
+  }
+
+  public function display_projects_meta_boxes () {
+    global $post;
+
+    $html =
+<<< EOF
+  <table class="form-table">
+    <tr>
+      <th><label for="Project URL">Project URL</label></th>
+      <td><input type="text" name="txt_url" id="txt_url" value="" class="widefat"></td>
+    </tr>
+    <tr>
+      <th><label for="Project Duration">Project Duration</label></th>
+      <td><input type="text" class="widefat" id="txt_duration" value=""></td>
+    </tr>
+  </table>
+EOF;
+
+    echo $html;
   }
 }
