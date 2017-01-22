@@ -16,6 +16,9 @@ class WPWA_Model_Project {
     add_action('init', array($this, 'create_projects_custom_taxonomies'));
 
     add_action('add_meta_boxes', array($this, 'add_projects_meta_boxes'));
+
+    add_action('save_post', array($this, 'save_project_meta_data'));
+    add_filter( 'post_updated_messages', array( $this, 'generate_project_messages' ) );
   }
 
   function create_projects_post_type () {
@@ -113,8 +116,83 @@ class WPWA_Model_Project {
     global $post;
 
     $data = array();
-    $data['project_meta_nonce'] = wp_create_nonce('wpwa-project-meta');
+    $data['project_meta_nonce']   = wp_create_nonce('wpwa-project-meta');
+    $data['project_url']          = esc_url(get_post_meta( $post->ID, "_wpwa_project_url", true ));
+    $data['project_duration']     = esc_attr(get_post_meta( $post->ID, "_wpwa_project_duration", true ));
+    $data['project_download_url'] = esc_attr(get_post_meta( $post->ID, "_wpwa_project_download_url", true ));
+    $data['project_status']       = esc_attr(get_post_meta( $post->ID, "_wpwa_project_status", true ));
 
     echo $this->template_parser->render('project_meta.html', $data);
+  }
+
+  public function save_project_meta_data ($post_id) {
+    global $post;
+    if (!$post_id || !isset($_POST['project_meta_none'])) return;
+    if (!wp_verify_nonce($_POST['project_meta_nonce'], 'wpwa-project-meta')) return $post->ID;
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return $post->ID;
+
+    if ($this->post_type !== $_POST['post_type'] && current_user_can('edit_post', $post->ID)) {
+      // sanitizing and casting
+      $project_url = isset($_POST['txt_url']) ? (string) esc_url(trim($_POST['txt_url'])) : '';
+      $project_duration = isset($_POST['txt_duration']) ? (float) esc_url(trim($_POST['txt_duration'])) : '';
+      $project_download_url = isset($_POST['txt_download_url']) ? (string) esc_url(trim($_POST['txt_download_url'])) : '';
+      $project_status = isset($_POST['sel_project_status']) ? (string) esc_url(trim($_POST['sel_project_status'])) : '';
+
+      // validate
+      if (empty($_POST['post_title'])) {
+        $this->error_message .= __('Project name cannot be empty. <br>', 'wpwa');
+      }
+      if ('0' == $project_status) {
+        $this->error_message .= __('Project status annnot be empty. <br>', 'wpwa');
+      }
+
+      // error handling
+      if (!empty($this->error_message)) {
+        remove_action('save_post', array($this, 'save_project_meta_data'));
+
+        $post->post_status = 'draft';
+        wp_update_post($post);
+
+        add_action('save_post', array($this, 'save_project_meta_data'));
+        $this->error_message = __('Project cration faild. <br>').$this->error_message;
+        set_transient('project_error_message_'.$post->ID, $this->error_message, 60*10);
+      } else {
+        update_post_meta($post->ID, '_wpwa_project_url', $project_url);
+        update_post_meta($post->ID, '_wpwa_project_duration', $project_duration);
+        update_post_meta($post->ID, '_wpwa_project_download_url', $project_download_url);
+        update_post_meta($post->ID, '_wpwa_project_status', $project_status);
+      }
+    } else {
+      return $post->ID;
+    }
+  }
+
+  public function generate_project_messages( $messages ) {
+    global $post, $post_ID;
+
+    $this->error_message = get_transient( "project_error_message_$post->ID" );
+    $message_no = isset($_GET['message']) ? (int) $_GET['message'] : '0';
+    delete_transient( "project_error_message_$post->ID" );
+
+    if ( !empty( $this->error_message ) ) {
+      $messages[$this->post_type] = array( "$message_no" => $this->error_message );
+    } else {
+      $messages[$this->post_type] = array(
+        0 => '', // Unused. Messages start at index 1.
+        1 => sprintf(__('Project updated. <a href="%s">View Project</a>', 'wpwa' ), esc_url(get_permalink($post_ID))),
+        2 => __('Custom field updated.', 'wpwa' ),
+        3 => __('Custom field deleted.', 'wpwa' ),
+        4 => __('Project updated.', 'wpwa' ),
+        5 => isset($_GET['revision']) ? sprintf(__('Project restored to revision from %s', 'wpwa' ), wp_post_revision_title((int) $_GET['revision'], false)) : false,
+        6 => sprintf(__('Project published. <a href="%s">View Project</a>', 'wpwa' ), esc_url(get_permalink($post_ID))),
+        7 => __('Project saved.', 'wpwa' ),
+        8 => sprintf(__('Project submitted. <a target="_blank" href="%s">Preview Project</a>', 'wpwa' ), esc_url(add_query_arg('preview', 'true', get_permalink($post_ID)))),
+        9 => sprintf(__('Project scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview Project</a>', 'wpwa' ),
+        date_i18n(__('M j, Y @ G:i'), strtotime($post->post_date)), esc_url(get_permalink($post_ID))),
+        10 => sprintf(__('Project draft updated. <a target="_blank" href="%s">Preview Project</a>', 'wpwa' ), esc_url(add_query_arg('preview', 'true', get_permalink($post_ID)))),
+      );
+    }
+
+    return $messages;
   }
 }
