@@ -1,0 +1,30 @@
+<input type="hidden" name="project_meta_nonce" value="{{project_meta_nonce}}">
+<table class="form-table">
+  <tr>
+    <th style=""><label for="Project Status">Project Status*</label></th>
+    <td>
+      <select name="sel_project_status" id="sel_project_status" class="widefat">
+        <option value="0" {% if project_status == 0 %}selected{% endif %}>Select</option>
+        <option value="planned" {% if project_status == 'planned' %}selected{% endif %}>Planned</option>
+        <option value="pending" {% if project_status == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="failed" {% if project_status == 'failed' %}selected{% endif %}>Failed</option>
+        <option value="completed" {% if project_status == 'completed' %}selected{% endif %}>Completed</option>
+      </select>
+    </td>
+  </tr>
+
+  <tr>
+    <th style=""><label for="Project Duration">Project Duration</label></th>
+    <td><input type="text" class="widefat" id="txt_duration" name="txt_duration" value="{{project_duration}}"></td>
+  </tr>
+
+  <tr>
+    <th style=""><label for="Project URL">Project URL</label></th>
+    <td><input type="text" class="widefat" id="txt_url" name="txt_url" value="{{project_url}}"></td>
+  </tr>
+
+  <tr>
+    <th style=""><label for="Download URL">Download URL</label></th>
+    <td><input type="text" class="widefat" id="txt_download_url" name="txt_download_url" value="{{project_download_url}}"></td>
+  </tr>
+</table>

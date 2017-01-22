@@ -10,6 +10,7 @@
 */
 
 spl_autoload_register('wpwa_autoloader');
+require __DIR__ . '/vendor/autoload.php';
 
 function wpwa_autoloader($class_name) {
   $class_components = explode('_', $class_name);
@@ -39,7 +40,9 @@ class WPWA_Custom_Post_Manager {
 
   public function __construct () {
     $this->base_path = plugin_dir_path(__FILE__);
-    $this->projects  = new WPWA_Model_Project();
+    require_once $this->base_path . 'class-twig-initializer.php';
+    $this->template_parser = Twig_Initializer::initialize_templates();
+    $this->projects = new WPWA_Model_Project($this->template_parser);
   }
 }
 $custom_post_manager = new WPWA_Custom_Post_Manager();

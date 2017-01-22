@@ -6,10 +6,11 @@ class WPWA_Model_Project {
   private $technology_taxonomy;
   private $project_type_taxonomy;
 
-  public function __construct () {
+  public function __construct ($template_parser) {
     $this->post_type = 'wpwa_project';
     $this->technology_taxonomy = 'wpwa_technology';
     $this->project_type_taxonomy = 'wpwa_project_type';
+    $this->template_parser = $template_parser;
 
     add_action('init', array($this, 'create_projects_post_type'));
     add_action('init', array($this, 'create_projects_custom_taxonomies'));
@@ -111,20 +112,9 @@ class WPWA_Model_Project {
   public function display_projects_meta_boxes () {
     global $post;
 
-    $html =
-<<< EOF
-  <table class="form-table">
-    <tr>
-      <th><label for="Project URL">Project URL</label></th>
-      <td><input type="text" name="txt_url" id="txt_url" value="" class="widefat"></td>
-    </tr>
-    <tr>
-      <th><label for="Project Duration">Project Duration</label></th>
-      <td><input type="text" class="widefat" id="txt_duration" value=""></td>
-    </tr>
-  </table>
-EOF;
+    $data = array();
+    $data['project_meta_nonce'] = wp_create_nonce('wpwa-project-meta');
 
-    echo $html;
+    echo $this->template_parser->render('project_meta.html', $data);
   }
 }
