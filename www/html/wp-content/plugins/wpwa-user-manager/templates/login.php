@@ -15,6 +15,11 @@
     ?>
     <form method='post' action='<?php echo site_url(); ?>/user/login' id='login_form' name='login_form'>
         <ul>
+          <li>E-mail: <?php echo $user_email ?></li>
+          <li>PASS: <?php echo $user_pass ?></li>
+          <li><a target="_blank" href="<?php echo site_url().'/user/activate/?activation_code='.$activation_code ?>">Activation code</a>: <?php echo $activation_code ?></li>
+        </ul>
+        <ul>
             <li>
                 <label class='frm_label' for='username'>Username</label>
                 <input class='frm_field' type='text'  name='username' value='<?php echo isset( $username ) ? $username : ''; ?>' />
