@@ -5,11 +5,15 @@ class WPWA_Model_Project {
 
   private $technology_taxonomy;
   private $project_type_taxonomy;
+  private $error_message;
 
   public function __construct ($template_parser) {
-    $this->post_type = 'wpwa_project';
-    $this->technology_taxonomy = 'wpwa_technology';
+    $this->post_type             = 'wpwa_project';
+    $this->technology_taxonomy   = 'wpwa_technology';
     $this->project_type_taxonomy = 'wpwa_project_type';
+
+    $this->error_message = '';
+
     $this->template_parser = $template_parser;
 
     add_action('init', array($this, 'create_projects_post_type'));
@@ -121,29 +125,33 @@ class WPWA_Model_Project {
     $data['project_duration']     = esc_attr(get_post_meta( $post->ID, "_wpwa_project_duration", true ));
     $data['project_download_url'] = esc_attr(get_post_meta( $post->ID, "_wpwa_project_download_url", true ));
     $data['project_status']       = esc_attr(get_post_meta( $post->ID, "_wpwa_project_status", true ));
+    $data['project_screens']      = json_decode(get_post_meta($post->ID, '_wpwa_project_screens', true));
 
     echo $this->template_parser->render('project_meta.html', $data);
   }
 
   public function save_project_meta_data ($post_id) {
     global $post;
-    if (!$post_id || !isset($_POST['project_meta_none'])) return;
+    if (!$post_id || !isset($_POST['project_meta_nonce'])) return;
     if (!wp_verify_nonce($_POST['project_meta_nonce'], 'wpwa-project-meta')) return $post->ID;
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return $post->ID;
 
-    if ($this->post_type !== $_POST['post_type'] && current_user_can('edit_post', $post->ID)) {
+    if ($this->post_type == $_POST['post_type'] && current_user_can('edit_post', $post->ID)) {
       // sanitizing and casting
       $project_url = isset($_POST['txt_url']) ? (string) esc_url(trim($_POST['txt_url'])) : '';
-      $project_duration = isset($_POST['txt_duration']) ? (float) esc_url(trim($_POST['txt_duration'])) : '';
-      $project_download_url = isset($_POST['txt_download_url']) ? (string) esc_url(trim($_POST['txt_download_url'])) : '';
-      $project_status = isset($_POST['sel_project_status']) ? (string) esc_url(trim($_POST['sel_project_status'])) : '';
+      $project_duration = isset($_POST['txt_duration']) ? (float) esc_attr(trim($_POST['txt_duration'])) : '';
+      $project_download_url = isset($_POST['txt_download_url']) ? (string) esc_attr(trim($_POST['txt_download_url'])) : '';
+      $project_status = isset($_POST['sel_project_status']) ? (string) esc_attr(trim($_POST['sel_project_status'])) : '';
 
       // validate
       if (empty($_POST['post_title'])) {
         $this->error_message .= __('Project name cannot be empty. <br>', 'wpwa');
       }
       if ('0' == $project_status) {
-        $this->error_message .= __('Project status annnot be empty. <br>', 'wpwa');
+        $this->error_message .= __('Project status cannot be empty. <br>', 'wpwa');
+      }
+      if ( empty($project_duration)) {
+        $this->error_message .= __('Project duration cannot be empty. <br/>', 'wpwa' );
       }
 
       // error handling
@@ -161,6 +169,10 @@ class WPWA_Model_Project {
         update_post_meta($post->ID, '_wpwa_project_duration', $project_duration);
         update_post_meta($post->ID, '_wpwa_project_download_url', $project_download_url);
         update_post_meta($post->ID, '_wpwa_project_status', $project_status);
+
+        $project_screens = isset($_POST['h_project_screens']) ? $_POST['h_project_screens'] : '';
+        $porject_screens = json_encode($project_screens);
+        update_post_meta($post->ID, '_wpwa_project_screens', $porject_screens);
       }
     } else {
       return $post->ID;

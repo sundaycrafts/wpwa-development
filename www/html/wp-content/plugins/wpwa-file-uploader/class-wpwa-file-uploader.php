@@ -12,6 +12,7 @@ License: -
 class WPWA_File_Uploader {
   public function __construct () {
     add_action('admin_enqueue_scripts', array($this, 'include_script'));
+    add_filter('upload_mimes', array($this, 'filter_mime_types'));
   }
 
   public function include_script () {
@@ -29,6 +30,14 @@ class WPWA_File_Uploader {
       plugins_url('js/wpwa-file-uploader.js', __FILE__), array('jquery'));
 
     wp_enqueue_script('wpwa_file_upload');
+  }
+
+  public function filter_mime_types ($mimes) {
+    $mimes = array(
+      'jpg|jpeg|jpe' => 'image/jpeg'
+    );
+    do_action_ref_array('wpwa_custom_mimes', array(&$mimes));
+    return $mimes;
   }
 }
 $file_uploader = new WPWA_File_Uploader();

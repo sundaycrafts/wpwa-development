@@ -30,6 +30,14 @@
 
   <tr>
     <th><label for="Project Screens">Project Screens</label></th>
-    <td><input type="file" class="widefat wpwa_multi_file" id="project_screens"></td>
+    <td>
+      <input type="file" class="widefat wpwa_multi_file" id="project_screens">
+      <div class="wpwa_preview_box" id="project_screens_panel">
+        {% for item in project_screens %}
+        <img src="{{item}}" alt="" class="wpwa_img_prev">
+        <input type="hidden" class="wpwa_img_prev_hidden" name="h_project_screens[]" value="{{item}}">
+        {% endfor %}
+      </div>
+    </td>
   </tr>
 </table>
