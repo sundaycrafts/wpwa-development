@@ -11,6 +11,7 @@ License: -
 class WPWA_Dashboard {
   public function __construct () {
     add_action('wp_before_admin_bar_render', array($this, 'customize_admin_toolbar'));
+    add_action('admin_menu', array($this, 'customize_main_navigation'));
   }
 
   public function set_frontend_toolbar ($status) {
@@ -42,6 +43,11 @@ class WPWA_Dashboard {
         'parent' => 'wpwa-developers'
       ));
     }
+  }
+
+  public function customize_main_navigation () {
+    global $menu, $submenu;
+    remove_menu_page('index.php'); // same result as unset($menu[2]);
   }
 }
 $admin_dashboard = new WPWA_Dashboard();
